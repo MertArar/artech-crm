@@ -81,14 +81,12 @@ export default function ChatComposer({
     const selectedFiles = Array.from(event.target.files ?? []);
 
     selectedFiles.forEach((file) => {
-      const fileUrl = URL.createObjectURL(file);
-
       onAddOutgoingMessage({
         type: "file",
         content: "Belge gönderildi",
         fileName: file.name,
         fileSize: formatFileSize(file.size),
-        fileUrl,
+        fileUrl: URL.createObjectURL(file),
       });
     });
 
@@ -100,14 +98,12 @@ export default function ChatComposer({
     const selectedFiles = Array.from(event.target.files ?? []);
 
     selectedFiles.forEach((file) => {
-      const fileUrl = URL.createObjectURL(file);
-
       onAddOutgoingMessage({
         type: "media",
         content: "Fotoğraf / video gönderildi",
         fileName: file.name,
         fileSize: formatFileSize(file.size),
-        fileUrl,
+        fileUrl: URL.createObjectURL(file),
       });
     });
 
@@ -193,7 +189,7 @@ export default function ChatComposer({
   };
 
   return (
-    <div className="border-t border-neutral-100 bg-white p-2 sm:p-4">
+    <div className="shrink-0 border-t border-neutral-100 bg-white p-2 sm:p-4">
       {recordingError && (
         <div className="mb-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
           {recordingError}

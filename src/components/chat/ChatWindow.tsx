@@ -74,50 +74,52 @@ export default function ChatWindow({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4 border-b border-neutral-100 px-3 py-3 sm:px-5 sm:py-4">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="shrink-0 border-b border-neutral-100 px-3 py-3 sm:px-5 sm:py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={onBackMobile}
+              className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-2xl text-neutral-700 transition hover:bg-neutral-100 xl:hidden"
+              aria-label="Sohbet listesine dön"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-sm font-bold text-white sm:h-12 sm:w-12">
+              {getInitials(contact.firstName, contact.lastName)}
+
+              <span
+                className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white ${
+                  contact.isOnline ? "bg-emerald-500" : "bg-neutral-300"
+                }`}
+              />
+            </div>
+
+            <div className="min-w-0">
+              <h2 className="truncate text-base font-semibold text-neutral-950">
+                {contact.firstName} {contact.lastName}
+              </h2>
+
+              <p className="mt-1 truncate text-sm text-neutral-500">
+                {contact.isOnline ? "Çevrim içi" : "Çevrim dışı"} ·{" "}
+                {contact.department}
+              </p>
+            </div>
+          </div>
+
           <button
             type="button"
-            onClick={onBackMobile}
-            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-2xl text-neutral-700 transition hover:bg-neutral-100 xl:hidden"
-            aria-label="Sohbet listesine dön"
+            onClick={onDeleteChat}
+            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-2xl text-neutral-500 transition hover:bg-red-50 hover:text-red-600"
+            aria-label="Sohbeti sil"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <Trash2 className="h-5 w-5" />
           </button>
-
-          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-sm font-bold text-white sm:h-12 sm:w-12">
-            {getInitials(contact.firstName, contact.lastName)}
-
-            <span
-              className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white ${
-                contact.isOnline ? "bg-emerald-500" : "bg-neutral-300"
-              }`}
-            />
-          </div>
-
-          <div className="min-w-0">
-            <h2 className="truncate text-base font-semibold text-neutral-950">
-              {contact.firstName} {contact.lastName}
-            </h2>
-
-            <p className="mt-1 truncate text-sm text-neutral-500">
-              {contact.isOnline ? "Çevrim içi" : "Çevrim dışı"} ·{" "}
-              {contact.department}
-            </p>
-          </div>
         </div>
-
-        <button
-          type="button"
-          onClick={onDeleteChat}
-          className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-2xl text-neutral-500 transition hover:bg-red-50 hover:text-red-600"
-          aria-label="Sohbeti sil"
-        >
-          <Trash2 className="h-5 w-5" />
-        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-neutral-50 px-3 py-4 sm:px-5 sm:py-5 [scrollbar-color:#d4d4d4_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-track]:bg-transparent">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-neutral-50 px-3 py-4 sm:px-5 sm:py-5 [scrollbar-color:#d4d4d4_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-track]:bg-transparent">
         <div className="space-y-4">
           {messages.map((message) => {
             const isMine = message.sender === "me";

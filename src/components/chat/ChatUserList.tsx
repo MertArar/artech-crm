@@ -77,8 +77,8 @@ export default function ChatUserList({
   }, [contacts, searchValue]);
 
   return (
-    <aside className="overflow-hidden rounded-[2rem] border border-neutral-200 bg-white shadow-sm">
-      <div className="border-b border-neutral-100 p-4">
+    <aside className="flex h-[calc(100dvh-128px)] min-h-0 flex-col overflow-hidden rounded-[2rem] border border-neutral-200 bg-white shadow-sm xl:h-[calc(100dvh-238px)]">
+      <div className="shrink-0 border-b border-neutral-100 p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-neutral-950">
@@ -113,7 +113,7 @@ export default function ChatUserList({
         </div>
       </div>
 
-      <div className="max-h-[calc(100dvh-290px)] overflow-y-auto p-3 xl:max-h-[620px] [scrollbar-color:#d4d4d4_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-track]:bg-transparent">
+      <div className="min-h-0 flex-1 overflow-y-auto p-3 [scrollbar-color:#d4d4d4_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-track]:bg-transparent">
         {filteredContacts.map((contact) => {
           const isActive = contact.id === activeContactId;
 

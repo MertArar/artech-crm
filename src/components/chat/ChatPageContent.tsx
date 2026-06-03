@@ -11,13 +11,13 @@ import type { UserItem } from "@/data/users";
 import ChatComposer from "./ChatComposer";
 import ChatUserList from "./ChatUserList";
 import ChatWindow from "./ChatWindow";
-import NewChatModal from "./NewChatModal";
+import NewChatModal, { type NewChatMessagePayload } from "./NewChatModal";
 import { getMessagePreview } from "./chatUtils";
 
 type ChatPageContentProps = {
-  users: UserItem[];
-  conversations: ChatConversation[];
-  messages: ChatMessage[];
+  users?: UserItem[];
+  conversations?: ChatConversation[];
+  messages?: ChatMessage[];
 };
 
 type OutgoingMessagePayload = Omit<
@@ -33,17 +33,27 @@ type DeletedChatSnapshot = {
 
 const currentUserId = 2;
 
+function createMessageId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 export default function ChatPageContent({
-  users,
-  conversations,
-  messages,
+  users = [],
+  conversations = [],
+  messages = [],
 }: ChatPageContentProps) {
   const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [activeUserId, setActiveUserId] = useState<number | null>(null);
   const [localConversations, setLocalConversations] =
-    useState<ChatConversation[]>(conversations);
-  const [localMessages, setLocalMessages] = useState<ChatMessage[]>(messages);
+    useState<ChatConversation[]>(() => conversations);
+  const [localMessages, setLocalMessages] = useState<ChatMessage[]>(
+    () => messages
+  );
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [deletedChat, setDeletedChat] = useState<DeletedChatSnapshot | null>(
@@ -132,7 +142,7 @@ export default function ChatPageContent({
     }
 
     const newMessage: ChatMessage = {
-      id: crypto.randomUUID(),
+      id: createMessageId(),
       chatUserId: activeContact.id,
       sender: "me",
       createdAt: new Date().toISOString(),
@@ -143,8 +153,26 @@ export default function ChatPageContent({
     setLocalMessages((prev) => [...prev, newMessage]);
   };
 
-  const handleCreateChat = (selectedUserIds: number[], message: string) => {
-    const now = new Date().toISOString();
+  const handleCreateChat = (
+    selectedUserIds: number[],
+    newMessages: NewChatMessagePayload[] | string
+  ) => {
+    const normalizedMessages: NewChatMessagePayload[] = Array.isArray(
+      newMessages
+    )
+      ? newMessages
+      : [
+          {
+            type: "text",
+            content: newMessages,
+          },
+        ];
+
+    if (selectedUserIds.length === 0 || normalizedMessages.length === 0) {
+      return;
+    }
+
+    const baseTime = Date.now();
 
     const newConversations = selectedUserIds
       .filter(
@@ -159,18 +187,19 @@ export default function ChatPageContent({
         unreadCount: 0,
       }));
 
-    const newMessages: ChatMessage[] = selectedUserIds.map((userId) => ({
-      id: crypto.randomUUID(),
-      chatUserId: userId,
-      sender: "me",
-      type: "text",
-      content: message,
-      createdAt: now,
-      status: "sent",
-    }));
+    const createdMessages: ChatMessage[] = selectedUserIds.flatMap((userId) =>
+      normalizedMessages.map((message, index) => ({
+        id: createMessageId(),
+        chatUserId: userId,
+        sender: "me" as const,
+        createdAt: new Date(baseTime + index).toISOString(),
+        status: "sent" as const,
+        ...message,
+      }))
+    );
 
     setLocalConversations((prev) => [...prev, ...newConversations]);
-    setLocalMessages((prev) => [...prev, ...newMessages]);
+    setLocalMessages((prev) => [...prev, ...createdMessages]);
     setActiveUserId(selectedUserIds[0]);
     setIsNewChatOpen(false);
     setIsMobileChatOpen(true);
@@ -289,7 +318,7 @@ export default function ChatPageContent({
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="flex min-h-0 flex-col space-y-6">
         <div className={`${isMobileChatOpen ? "hidden xl:block" : "block"}`}>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-neutral-400">
             Chat
@@ -305,8 +334,12 @@ export default function ChatPageContent({
           </p>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
-          <div className={`${isMobileChatOpen ? "hidden xl:block" : "block"}`}>
+        <div className="grid min-h-0 gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+          <div
+            className={`min-h-0 ${
+              isMobileChatOpen ? "hidden xl:block" : "block"
+            }`}
+          >
             <ChatUserList
               contacts={sortedContacts}
               activeContactId={activeContact?.id ?? 0}
@@ -317,7 +350,7 @@ export default function ChatPageContent({
 
           {activeContact && (
             <section
-              className={`min-h-[calc(100dvh-130px)] flex-col overflow-hidden rounded-[2rem] border border-neutral-200 bg-white shadow-sm xl:flex xl:min-h-[720px] ${
+              className={`h-[calc(100dvh-128px)] min-h-0 flex-col overflow-hidden rounded-[2rem] border border-neutral-200 bg-white shadow-sm xl:h-[calc(100dvh-238px)] xl:flex ${
                 isMobileChatOpen ? "flex" : "hidden"
               }`}
             >

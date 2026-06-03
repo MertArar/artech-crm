@@ -3,10 +3,14 @@
 import {
   Check,
   ChevronDown,
+  FileText,
+  Plus,
   Search,
   Send,
+  Trash2,
   UserPlus,
   Users,
+  Video,
   X,
 } from "lucide-react";
 import {
@@ -14,17 +18,44 @@ import {
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
   type FormEvent,
 } from "react";
+import type { ChatMessage } from "@/data/chat";
 import type { UserItem } from "@/data/users";
-import { getInitials } from "./chatUtils";
+import {
+  documentAccept,
+  formatFileSize,
+  getInitials,
+  mediaAccept,
+} from "./chatUtils";
+
+export type NewChatMessagePayload = Omit<
+  ChatMessage,
+  "id" | "chatUserId" | "sender" | "createdAt" | "status"
+>;
+
+type NewChatAttachment = NewChatMessagePayload & {
+  localId: string;
+};
 
 type NewChatModalProps = {
   users: UserItem[];
   currentUserId: number;
   onClose: () => void;
-  onCreateChat: (selectedUserIds: number[], message: string) => void;
+  onCreateChat: (
+    selectedUserIds: number[],
+    messages: NewChatMessagePayload[]
+  ) => void;
 };
+
+function createLocalId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
 
 export default function NewChatModal({
   users,
@@ -34,17 +65,22 @@ export default function NewChatModal({
 }: NewChatModalProps) {
   const roleDropdownRef = useRef<HTMLDivElement | null>(null);
   const departmentDropdownRef = useRef<HTMLDivElement | null>(null);
+  const attachmentMenuRef = useRef<HTMLDivElement | null>(null);
+  const documentInputRef = useRef<HTMLInputElement | null>(null);
+  const mediaInputRef = useRef<HTMLInputElement | null>(null);
 
   const [searchValue, setSearchValue] = useState("");
   const [selectedRole, setSelectedRole] = useState("Tümü");
   const [selectedDepartment, setSelectedDepartment] = useState("Tümü");
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [messageValue, setMessageValue] = useState("");
+  const [attachments, setAttachments] = useState<NewChatAttachment[]>([]);
   const [formError, setFormError] = useState("");
 
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isDepartmentDropdownOpen, setIsDepartmentDropdownOpen] =
     useState(false);
+  const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
 
   const availableUsers = useMemo(() => {
     return users.filter((user) => user.id !== currentUserId);
@@ -111,6 +147,13 @@ export default function NewChatModal({
       ) {
         setIsDepartmentDropdownOpen(false);
       }
+
+      if (
+        attachmentMenuRef.current &&
+        !attachmentMenuRef.current.contains(target)
+      ) {
+        setIsAttachmentMenuOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -130,55 +173,114 @@ export default function NewChatModal({
     });
   };
 
+  const handleDocumentSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+
+    const newAttachments: NewChatAttachment[] = selectedFiles.map((file) => ({
+      localId: createLocalId(),
+      type: "file",
+      content: "Belge gönderildi",
+      fileName: file.name,
+      fileSize: formatFileSize(file.size),
+      fileUrl: URL.createObjectURL(file),
+    }));
+
+    setAttachments((prev) => [...prev, ...newAttachments]);
+    event.target.value = "";
+    setIsAttachmentMenuOpen(false);
+  };
+
+  const handleMediaSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+
+    const newAttachments: NewChatAttachment[] = selectedFiles.map((file) => ({
+      localId: createLocalId(),
+      type: "media",
+      content: "Fotoğraf / video gönderildi",
+      fileName: file.name,
+      fileSize: formatFileSize(file.size),
+      fileUrl: URL.createObjectURL(file),
+    }));
+
+    setAttachments((prev) => [...prev, ...newAttachments]);
+    event.target.value = "";
+    setIsAttachmentMenuOpen(false);
+  };
+
+  const removeAttachment = (localId: string) => {
+    setAttachments((prev) =>
+      prev.filter((attachment) => attachment.localId !== localId)
+    );
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const trimmedMessage = messageValue.trim();
 
     if (selectedUserIds.length === 0) {
       setFormError("En az bir kullanıcı seçmelisin.");
       return;
     }
 
-    if (!messageValue.trim()) {
-      setFormError("Mesaj alanı boş olamaz.");
+    if (!trimmedMessage && attachments.length === 0) {
+      setFormError("Mesaj yazmalı veya dosya seçmelisin.");
       return;
     }
 
+    const messages: NewChatMessagePayload[] = [];
+
+    if (trimmedMessage) {
+      messages.push({
+        type: "text",
+        content: trimmedMessage,
+      });
+    }
+
+    attachments.forEach((attachment) => {
+      const { localId, ...attachmentPayload } = attachment;
+      messages.push(attachmentPayload);
+    });
+
     setFormError("");
-    onCreateChat(selectedUserIds, messageValue.trim());
+    onCreateChat(selectedUserIds, messages);
   };
 
   return (
     <div className="fixed inset-0 z-[90] flex items-end bg-neutral-950/50 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4">
       <div className="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[2rem] bg-white shadow-2xl sm:max-w-3xl sm:rounded-[2rem]">
-        <div className="flex items-center justify-between gap-4 border-b border-neutral-100 px-5 py-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-white">
-              <UserPlus className="h-5 w-5" />
+        <div className="shrink-0 border-b border-neutral-100 px-5 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-white">
+                <UserPlus className="h-5 w-5" />
+              </div>
+
+              <div className="min-w-0">
+                <h2 className="truncate text-lg font-semibold text-neutral-950">
+                  Yeni Sohbet
+                </h2>
+
+                <p className="mt-1 text-sm text-neutral-500">
+                  Kullanıcı seçip mesaj, belge, fotoğraf veya video
+                  gönderebilirsin.
+                </p>
+              </div>
             </div>
 
-            <div className="min-w-0">
-              <h2 className="truncate text-lg font-semibold text-neutral-950">
-                Yeni Sohbet
-              </h2>
-
-              <p className="mt-1 text-sm text-neutral-500">
-                Bir veya birden fazla kullanıcı seçip mesaj gönderebilirsin.
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-2xl text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950"
+              aria-label="Pencereyi kapat"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-2xl text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950"
-            aria-label="Pencereyi kapat"
-          >
-            <X className="h-5 w-5" />
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="border-b border-neutral-100 p-4">
+          <div className="shrink-0 border-b border-neutral-100 p-4">
             <div className="grid gap-3 md:grid-cols-2">
               <div ref={roleDropdownRef} className="relative">
                 <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-neutral-400">
@@ -228,7 +330,6 @@ export default function NewChatModal({
                           }`}
                         >
                           <span className="truncate">{role}</span>
-
                           {isSelected && <Check className="h-4 w-4" />}
                         </button>
                       );
@@ -285,7 +386,6 @@ export default function NewChatModal({
                           }`}
                         >
                           <span className="truncate">{department}</span>
-
                           {isSelected && <Check className="h-4 w-4" />}
                         </button>
                       );
@@ -381,10 +481,66 @@ export default function NewChatModal({
             </div>
           </div>
 
-          <div className="border-t border-neutral-100 p-4">
+          <div className="shrink-0 border-t border-neutral-100 p-4">
+            <input
+              ref={documentInputRef}
+              type="file"
+              multiple
+              accept={documentAccept}
+              onChange={handleDocumentSelect}
+              className="hidden"
+            />
+
+            <input
+              ref={mediaInputRef}
+              type="file"
+              multiple
+              accept={mediaAccept}
+              onChange={handleMediaSelect}
+              className="hidden"
+            />
+
             {selectedUserIds.length > 0 && (
               <div className="mb-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-semibold text-neutral-700">
                 {selectedUserIds.length} kullanıcı seçildi
+              </div>
+            )}
+
+            {attachments.length > 0 && (
+              <div className="mb-3 max-h-36 space-y-2 overflow-y-auto rounded-2xl border border-neutral-200 bg-neutral-50 p-3 [scrollbar-width:thin]">
+                {attachments.map((attachment) => (
+                  <div
+                    key={attachment.localId}
+                    className="flex items-center gap-3 rounded-xl bg-white px-3 py-2"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-950 text-white">
+                      {attachment.type === "file" ? (
+                        <FileText className="h-4 w-4" />
+                      ) : (
+                        <Video className="h-4 w-4" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-neutral-950">
+                        {attachment.fileName}
+                      </p>
+
+                      <p className="mt-0.5 text-xs text-neutral-500">
+                        {attachment.fileSize}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(attachment.localId)}
+                      className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl text-neutral-400 transition hover:bg-red-50 hover:text-red-600"
+                      aria-label="Dosyayı kaldır"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -395,6 +551,65 @@ export default function NewChatModal({
             )}
 
             <div className="flex gap-2">
+              <div ref={attachmentMenuRef} className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsAttachmentMenuOpen((prev) => !prev)}
+                  className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border transition ${
+                    isAttachmentMenuOpen
+                      ? "border-neutral-950 bg-neutral-950 text-white"
+                      : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100"
+                  }`}
+                  aria-label="Dosya ekle"
+                >
+                  <Plus className="h-5 w-5" />
+                </button>
+
+                {isAttachmentMenuOpen && (
+                  <div className="absolute bottom-[calc(100%+10px)] left-0 z-50 w-64 overflow-hidden rounded-[1.5rem] border border-neutral-200 bg-white p-2 shadow-2xl">
+                    <button
+                      type="button"
+                      onClick={() => documentInputRef.current?.click()}
+                      className="flex w-full cursor-pointer items-center gap-3 rounded-2xl p-3 text-left transition hover:bg-neutral-50"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-white">
+                        <FileText className="h-5 w-5" />
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-semibold text-neutral-950">
+                          Belge
+                        </p>
+
+                        <p className="mt-1 text-xs text-neutral-500">
+                          PDF, Word, Excel, PPT, TXT
+                        </p>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => mediaInputRef.current?.click()}
+                      className="flex w-full cursor-pointer items-center gap-3 rounded-2xl p-3 text-left transition hover:bg-neutral-50"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-700">
+                        <Video className="h-5 w-5" />
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-semibold text-neutral-950">
+                          Fotoğraf / Video
+                        </p>
+
+                        <p className="mt-1 text-xs text-neutral-500">
+                          Görsel ve video dosyaları
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <input
                 type="text"
                 value={messageValue}
