@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Menu, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
+import NotificationsPopover from "./NotificationsPopover";
 
 type TopbarProps = {
   onOpenMobileSidebar: () => void;
@@ -42,21 +43,15 @@ export default function Topbar({ onOpenMobileSidebar }: TopbarProps) {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950"
-            aria-label="Bildirimler"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-red-500" />
-          </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <NotificationsPopover />
 
           <Link
             href="/profile"
-            className="hidden cursor-pointer items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-3 py-2 transition hover:border-neutral-300 hover:bg-neutral-100 sm:flex"
+            className="flex cursor-pointer items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-2 transition hover:border-neutral-300 hover:bg-neutral-100 sm:px-3 sm:py-2"
+            aria-label="Profil sayfasına git"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-950 text-xs font-bold text-white">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-950 text-xs font-bold text-white">
               MA
             </div>
 

@@ -47,7 +47,7 @@ export const navigation = [
       },
       {
         label: "Görevler",
-        href: "/tasks",
+        href: "/assign-task",
         icon: CheckSquare,
       },
     ],
@@ -71,7 +71,7 @@ export const navigation = [
     title: "Sistem",
     items: [
       {
-        label: "Chat",
+        label: "Mesajlar",
         href: "/chat",
         icon: MessageSquare,
       },

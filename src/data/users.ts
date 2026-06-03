@@ -140,9 +140,9 @@ export const users: UserItem[] = [
   },
   {
     id: 13,
-    firstName: "Berkay",
-    lastName: "Vural",
-    email: "berkay@artech.com",
+    firstName: "Sencer",
+    lastName: "Uşaklı",
+    email: "sencer@artech.com",
     phone: "+90 555 404 50 60",
     identityNumber: "44556677889",
     role: "Destek",
