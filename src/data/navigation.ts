@@ -9,7 +9,9 @@ import {
   UserCog,
   UserPlus,
   Users,
+  Building,
 } from "lucide-react";
+
 
 export const navigation = [
   {
@@ -65,6 +67,11 @@ export const navigation = [
         href: "/roles",
         icon: ShieldCheck,
       },
+      {
+        label: "Departmanlar",
+        href: "/departments",
+        icon: Building,
+      }
     ],
   },
   {

@@ -1,8 +1,11 @@
+import type { DepartmentName } from "@/data/departments";
+
 export type UserRole =
   | "Yönetici"
   | "Satış Temsilcisi"
   | "Operasyon"
   | "Muhasebe"
+  | "Mali Müslavir"
   | "Destek";
 
 export type UserItem = {
@@ -14,7 +17,7 @@ export type UserItem = {
   phone: string;
   identityNumber: string;
   role: UserRole;
-  department: string;
+  department: DepartmentName;
 };
 
 export const users: UserItem[] = [
@@ -55,7 +58,7 @@ export const users: UserItem[] = [
     email: "dogan@artech.com",
     phone: "+90 555 444 55 66",
     identityNumber: "45678901234",
-    role: "Muhasebe",
+    role: "Mali Müslavir",
     department: "Finans",
   },
   {

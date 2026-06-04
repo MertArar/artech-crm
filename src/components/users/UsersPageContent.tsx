@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  Building2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Mail,
@@ -10,12 +12,17 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import RoleDropdown, { type RoleFilter } from "./RoleDropdown";
+
+import { departmentsData, type DepartmentName } from "@/data/departments";
 import type { UserItem } from "@/data/users";
+
+import RoleDropdown, { type RoleFilter } from "./RoleDropdown";
 
 type UsersPageContentProps = {
   users: UserItem[];
 };
+
+type DepartmentFilter = "Tümü" | DepartmentName;
 
 const USERS_PER_PAGE = 15;
 
@@ -26,6 +33,8 @@ function maskIdentityNumber(identityNumber: string) {
 export default function UsersPageContent({ users }: UsersPageContentProps) {
   const [searchValue, setSearchValue] = useState("");
   const [selectedRole, setSelectedRole] = useState<RoleFilter>("Tümü");
+  const [selectedDepartment, setSelectedDepartment] =
+    useState<DepartmentFilter>("Tümü");
   const [currentPage, setCurrentPage] = useState(1);
 
   const roles = useMemo<RoleFilter[]>(() => {
@@ -33,6 +42,10 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
 
     return ["Tümü", ...uniqueRoles];
   }, [users]);
+
+  const departments = useMemo<DepartmentFilter[]>(() => {
+    return ["Tümü", ...departmentsData.map((department) => department.name)];
+  }, []);
 
   const filteredUsers = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLocaleLowerCase("tr-TR");
@@ -56,9 +69,14 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
       const matchesRole =
         selectedRole === "Tümü" ? true : user.role === selectedRole;
 
-      return matchesSearch && matchesRole;
+      const matchesDepartment =
+        selectedDepartment === "Tümü"
+          ? true
+          : user.department === selectedDepartment;
+
+      return matchesSearch && matchesRole && matchesDepartment;
     });
-  }, [users, searchValue, selectedRole]);
+  }, [users, searchValue, selectedRole, selectedDepartment]);
 
   const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
 
@@ -72,6 +90,11 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
 
   const handleRoleChange = (role: RoleFilter) => {
     setSelectedRole(role);
+    setCurrentPage(1);
+  };
+
+  const handleDepartmentChange = (department: DepartmentFilter) => {
+    setSelectedDepartment(department);
     setCurrentPage(1);
   };
 
@@ -101,8 +124,8 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-600">
-            Sistemde kayıtlı kullanıcıları arayabilir, role göre filtreleyebilir
-            ve kullanıcı bilgilerini görüntüleyebilirsiniz.
+            Sistemde kayıtlı kullanıcıları arayabilir, role ve departmana göre
+            filtreleyebilir ve kullanıcı bilgilerini görüntüleyebilirsiniz.
           </p>
         </div>
 
@@ -144,8 +167,8 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
       </div>
 
       <section className="rounded-[2rem] border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex h-12 min-w-0 flex-1 items-center rounded-2xl border border-neutral-200 bg-white px-4 transition focus-within:border-neutral-700 focus-within:shadow-sm lg:max-w-xl">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex h-12 min-w-0 flex-1 items-center rounded-2xl border border-neutral-200 bg-white px-4 transition focus-within:border-neutral-700 focus-within:shadow-sm xl:max-w-xl">
             <Search className="mr-3 h-5 w-5 shrink-0 text-neutral-400" />
 
             <input
@@ -157,11 +180,19 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
             />
           </div>
 
-          <RoleDropdown
-            roles={roles}
-            selectedRole={selectedRole}
-            onChange={handleRoleChange}
-          />
+          <div className="grid gap-3 sm:grid-cols-2 xl:flex xl:items-center">
+            <DepartmentDropdown
+              departments={departments}
+              selectedDepartment={selectedDepartment}
+              onChange={handleDepartmentChange}
+            />
+
+            <RoleDropdown
+              roles={roles}
+              selectedRole={selectedRole}
+              onChange={handleRoleChange}
+            />
+          </div>
         </div>
       </section>
 
@@ -235,9 +266,11 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 xl:hidden">
                     Departman
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-neutral-800 xl:mt-0">
+
+                  <span className="mt-2 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 xl:mt-0">
+                    <Building2 className="h-3.5 w-3.5 text-neutral-400" />
                     {user.department}
-                  </p>
+                  </span>
                 </div>
 
                 <div className="flex xl:justify-end">
@@ -255,7 +288,8 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
                 Kullanıcı bulunamadı.
               </p>
               <p className="mt-2 text-sm text-neutral-500">
-                Arama veya rol filtresini değiştirerek tekrar deneyebilirsin.
+                Arama, rol veya departman filtresini değiştirerek tekrar
+                deneyebilirsin.
               </p>
             </div>
           )}
@@ -320,6 +354,40 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+type DepartmentDropdownProps = {
+  departments: DepartmentFilter[];
+  selectedDepartment: DepartmentFilter;
+  onChange: (department: DepartmentFilter) => void;
+};
+
+function DepartmentDropdown({
+  departments,
+  selectedDepartment,
+  onChange,
+}: DepartmentDropdownProps) {
+  return (
+    <div className="relative">
+      <Building2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+
+      <select
+        value={selectedDepartment}
+        onChange={(event) =>
+          onChange(event.target.value as DepartmentFilter)
+        }
+        className="h-12 w-full cursor-pointer appearance-none rounded-2xl border border-neutral-200 bg-white pl-11 pr-10 text-sm font-semibold text-neutral-700 outline-none transition hover:bg-neutral-50 focus:border-neutral-700 focus:shadow-sm sm:min-w-52"
+      >
+        {departments.map((department) => (
+          <option key={department} value={department}>
+            {department === "Tümü" ? "Tüm Departmanlar" : department}
+          </option>
+        ))}
+      </select>
+
+      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
     </div>
   );
 }
