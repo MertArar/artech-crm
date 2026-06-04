@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
@@ -10,6 +11,7 @@ type AppShellProps = {
 };
 
 const authRoutes = ["/login", "/register", "/forgot-password"];
+const plainRoutes = ["/FAQ"];
 
 export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
@@ -18,8 +20,9 @@ export default function AppShell({ children }: AppShellProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const isAuthPage = authRoutes.includes(pathname);
+  const isPlainPage = plainRoutes.includes(pathname);
 
-  if (isAuthPage) {
+  if (isAuthPage || isPlainPage) {
     return <>{children}</>;
   }
 
