@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Building2,
   Check,
@@ -78,6 +84,8 @@ export default function AssignableUsersList({
       return [];
     }
 
+    const normalizedSearch = searchValue.trim().toLocaleLowerCase("tr-TR");
+
     return users.filter((user) => {
       const matchesDepartment =
         appliedDepartments.includes("Genel") ||
@@ -88,9 +96,31 @@ export default function AssignableUsersList({
         appliedRoles.includes("Genel") ||
         appliedRoles.includes(user.role as RoleFilter);
 
-      return matchesDepartment && matchesRole;
+      const searchableText = [
+        user.firstName,
+        user.lastName,
+        user.email,
+        user.phone,
+        user.identityNumber,
+        user.department,
+        user.role,
+      ]
+        .join(" ")
+        .toLocaleLowerCase("tr-TR");
+
+      const matchesSearch =
+        normalizedSearch.length === 0 ||
+        searchableText.includes(normalizedSearch);
+
+      return matchesDepartment && matchesRole && matchesSearch;
     });
-  }, [users, hasAppliedDepartmentFilter, appliedDepartments, appliedRoles]);
+  }, [
+    users,
+    searchValue,
+    hasAppliedDepartmentFilter,
+    appliedDepartments,
+    appliedRoles,
+  ]);
 
   const handleApplyFilters = () => {
     setAppliedDepartments(draftDepartments);
@@ -99,25 +129,25 @@ export default function AssignableUsersList({
 
   return (
     <section className="overflow-hidden rounded-[2rem] border border-neutral-200 bg-white shadow-sm">
-      <div className="border-b border-neutral-100 p-5">
+      <div className="border-b border-neutral-100 p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-neutral-950">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-neutral-950 sm:text-xl">
               Görev Verilebilecek Kullanıcılar
             </h2>
 
-            <p className="mt-2 text-sm text-neutral-500">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
               Departman ve rol filtrelerini seçip Uygula butonuna bastıktan
               sonra kullanıcılar listelenir.
             </p>
           </div>
 
-          <div className="rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-semibold text-neutral-600">
+          <div className="w-fit rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-semibold text-neutral-600">
             {filteredUsers.length} kullanıcı
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 xl:grid-cols-[220px_220px_minmax(0,1fr)]">
+        <div className="mt-5 grid gap-3 lg:grid-cols-2 2xl:grid-cols-[220px_220px_minmax(0,1fr)]">
           <MultiSelectDropdown
             title="Departman"
             placeholder="Departman seçin"
@@ -148,7 +178,7 @@ export default function AssignableUsersList({
             disabledText="Önce departman seçin"
           />
 
-          <div className="flex h-12 items-center rounded-2xl border border-neutral-200 bg-white px-4 transition focus-within:border-neutral-700 focus-within:shadow-sm">
+          <div className="flex h-12 items-center rounded-2xl border border-neutral-200 bg-white px-4 transition focus-within:border-neutral-700 focus-within:shadow-sm lg:col-span-2 2xl:col-span-1">
             <Search className="mr-3 h-5 w-5 shrink-0 text-neutral-400" />
 
             <input
@@ -161,7 +191,7 @@ export default function AssignableUsersList({
           </div>
         </div>
 
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <p className="text-xs leading-5 text-neutral-500">
             Departman seçimi yeterlidir. Rol seçmezseniz seçili departmanlardaki
             tüm kullanıcılar listelenir.
@@ -171,17 +201,17 @@ export default function AssignableUsersList({
             type="button"
             onClick={handleApplyFilters}
             disabled={draftDepartments.length === 0}
-            className="h-11 cursor-pointer rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-500"
+            className="h-11 w-full cursor-pointer rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-500 md:w-auto"
           >
             Uygula
           </button>
         </div>
       </div>
 
-      <div className="max-h-[760px] overflow-y-auto p-3 [scrollbar-color:#d4d4d4_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-track]:bg-transparent">
+      <div className="max-h-[calc(100vh-350px)] min-h-[260px] overflow-y-auto p-3 [scrollbar-color:#d4d4d4_transparent] [scrollbar-width:thin] sm:max-h-[calc(100vh-330px)] lg:max-h-[calc(100vh-310px)] 2xl:max-h-[760px] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-track]:bg-transparent">
         <div className="space-y-3">
           {!hasAppliedDepartmentFilter && (
-            <div className="rounded-[1.5rem] border border-dashed border-neutral-200 bg-neutral-50 px-5 py-12 text-center">
+            <div className="rounded-[1.5rem] border border-dashed border-neutral-200 bg-neutral-50 px-5 py-10 text-center sm:py-12">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-neutral-500 shadow-sm">
                 <Building2 className="h-5 w-5" />
               </div>
@@ -190,7 +220,7 @@ export default function AssignableUsersList({
                 Lütfen departman seçin.
               </p>
 
-              <p className="mt-2 text-sm leading-6 text-neutral-500">
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-neutral-500">
                 Kullanıcıları listelemek için önce departman filtresinden seçim
                 yapıp Uygula butonuna basın. Tüm kullanıcıları görmek için
                 departmanda Genel seçebilirsiniz.
@@ -213,9 +243,9 @@ export default function AssignableUsersList({
                       : "border-neutral-200 bg-white hover:bg-neutral-50"
                   }`}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4">
                     <div
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-sm font-bold ${
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-bold sm:h-12 sm:w-12 ${
                         isSelected
                           ? "bg-white text-neutral-950"
                           : "bg-neutral-950 text-white"
@@ -225,7 +255,7 @@ export default function AssignableUsersList({
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div className="min-w-0">
                           <p
                             className={`truncate text-sm font-semibold ${
@@ -311,14 +341,14 @@ export default function AssignableUsersList({
             })}
 
           {hasAppliedDepartmentFilter && filteredUsers.length === 0 && (
-            <div className="rounded-[1.5rem] border border-neutral-200 bg-neutral-50 px-5 py-12 text-center">
+            <div className="rounded-[1.5rem] border border-neutral-200 bg-neutral-50 px-5 py-10 text-center sm:py-12">
               <CircleAlert className="mx-auto h-8 w-8 text-neutral-400" />
 
               <p className="mt-4 text-sm font-semibold text-neutral-950">
                 Kullanıcı bulunamadı.
               </p>
 
-              <p className="mt-2 text-sm text-neutral-500">
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-neutral-500">
                 Seçili filtrelere uygun kullanıcı bulunamadı. Filtreleri veya
                 arama kelimesini değiştirerek tekrar deneyebilirsin.
               </p>
@@ -431,7 +461,9 @@ function MultiSelectDropdown<T extends string>({
           <div className="min-w-0">
             <p
               className={`truncate text-sm font-semibold ${
-                selectedItems.length > 0 ? "text-neutral-950" : "text-neutral-400"
+                selectedItems.length > 0
+                  ? "text-neutral-950"
+                  : "text-neutral-400"
               }`}
             >
               {selectedLabel}
@@ -515,7 +547,7 @@ function getSelectedLabel<T extends string>({
 type DropdownOptionProps = {
   label: string;
   description: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   isSelected: boolean;
   onClick: () => void;
 };

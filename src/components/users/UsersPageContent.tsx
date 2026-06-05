@@ -140,6 +140,7 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
                 <p className="text-sm font-medium text-neutral-500">
                   Toplam Kullanıcı
                 </p>
+
                 <p className="mt-1 text-2xl font-semibold text-neutral-950">
                   {users.length}
                 </p>
@@ -157,6 +158,7 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
                 <p className="text-sm font-medium text-neutral-500">
                   Listelenen
                 </p>
+
                 <p className="mt-1 text-2xl font-semibold text-neutral-950">
                   {filteredUsers.length}
                 </p>
@@ -168,17 +170,17 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
 
       <section className="rounded-[2rem] border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex h-12 min-w-0 flex-1 items-center rounded-2xl border border-neutral-200 bg-white px-4 transition focus-within:border-neutral-700 focus-within:shadow-sm xl:max-w-xl">
-            <Search className="mr-3 h-5 w-5 shrink-0 text-neutral-400" />
+<div className="relative w-full xl:max-w-xl">
+  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
 
-            <input
-              type="text"
-              value={searchValue}
-              onChange={(event) => handleSearchChange(event.target.value)}
-              placeholder="Ad, e-posta, telefon, TC, rol veya departman ara..."
-              className="h-full min-w-0 flex-1 bg-transparent text-sm font-medium text-neutral-950 outline-none placeholder:text-neutral-400"
-            />
-          </div>
+  <input
+    type="text"
+    value={searchValue}
+    onChange={(event) => handleSearchChange(event.target.value)}
+    placeholder="Ad, e-posta, telefon, TC, rol veya departman ara..."
+    className="h-12 w-full rounded-2xl border border-neutral-200 bg-neutral-50 pl-11 pr-4 text-sm font-semibold text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-300 focus:bg-white sm:bg-white sm:font-medium sm:focus:border-neutral-700 sm:focus:shadow-sm"
+  />
+</div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:flex xl:items-center">
             <DepartmentDropdown
@@ -226,6 +228,7 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
                     <p className="truncate text-sm font-semibold text-neutral-950">
                       {user.firstName} {user.lastName}
                     </p>
+
                     <p className="mt-1 text-xs text-neutral-500">
                       Kullanıcı ID: #{user.id}
                     </p>
@@ -248,6 +251,7 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 xl:hidden">
                     TC Kimlik
                   </p>
+
                   <p className="mt-1 text-sm font-semibold text-neutral-800 xl:mt-0">
                     {maskIdentityNumber(user.identityNumber)}
                   </p>
@@ -257,6 +261,7 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400 xl:hidden">
                     Rol
                   </p>
+
                   <span className="mt-2 inline-flex rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700 xl:mt-0">
                     {user.role}
                   </span>
@@ -287,6 +292,7 @@ export default function UsersPageContent({ users }: UsersPageContentProps) {
               <p className="text-sm font-semibold text-neutral-950">
                 Kullanıcı bulunamadı.
               </p>
+
               <p className="mt-2 text-sm text-neutral-500">
                 Arama, rol veya departman filtresini değiştirerek tekrar
                 deneyebilirsin.
@@ -375,9 +381,7 @@ function DepartmentDropdown({
 
       <select
         value={selectedDepartment}
-        onChange={(event) =>
-          onChange(event.target.value as DepartmentFilter)
-        }
+        onChange={(event) => onChange(event.target.value as DepartmentFilter)}
         className="h-12 w-full cursor-pointer appearance-none rounded-2xl border border-neutral-200 bg-white pl-11 pr-10 text-sm font-semibold text-neutral-700 outline-none transition hover:bg-neutral-50 focus:border-neutral-700 focus:shadow-sm sm:min-w-52"
       >
         {departments.map((department) => (
