@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft, LogOut, PanelLeftOpen, X } from "lucide-react";
+
 import { navigation } from "@/data/navigation";
 
 type SidebarProps = {
@@ -134,11 +135,15 @@ export default function Sidebar({
                       />
 
                       <span
-                        className={`truncate ${
+                        className={`flex min-w-0 flex-1 items-center justify-between gap-2 ${
                           isCollapsed ? "lg:hidden" : ""
                         }`}
                       >
-                        {item.label}
+                        <span className="whitespace-nowrap text-[13px] sm:text-sm">
+                          {item.label}
+                        </span>
+
+                        {item.ai && <AiBadge />}
                       </span>
                     </Link>
                   );
@@ -147,20 +152,63 @@ export default function Sidebar({
             </div>
           ))}
         </nav>
-
-        <div className="border-t border-neutral-100 p-4">
-          <button
-            type="button"
-            className={`flex h-11 w-full cursor-pointer items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-neutral-500 transition hover:bg-red-50 hover:text-red-600 ${
-              isCollapsed ? "lg:justify-center" : ""
-            }`}
-          >
-            <LogOut className="h-5 w-5 shrink-0" />
-
-            <span className={isCollapsed ? "lg:hidden" : ""}>Çıkış Yap</span>
-          </button>
-        </div>
       </aside>
     </>
+  );
+}
+
+function AiBadge() {
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap">
+      <AiSparkleIcon />
+
+      <span className="bg-gradient-to-r from-pink-400 via-fuchsia-500 to-violet-600 bg-clip-text text-[10px] font-black tracking-[0.14em] text-transparent">
+        AI
+      </span>
+    </span>
+  );
+}
+
+function AiSparkleIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0 drop-shadow-[0_0_5px_rgba(168,85,247,0.45)]"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient
+          id="ai-sidebar-sparkle-gradient"
+          x1="3"
+          y1="3"
+          x2="21"
+          y2="21"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#f9a8d4" />
+          <stop offset="45%" stopColor="#e879f9" />
+          <stop offset="100%" stopColor="#8b5cf6" />
+        </linearGradient>
+      </defs>
+
+      <path
+        d="M12 2.75L13.95 8.05L19.25 10L13.95 11.95L12 17.25L10.05 11.95L4.75 10L10.05 8.05L12 2.75Z"
+        stroke="url(#ai-sidebar-sparkle-gradient)"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M18.5 14.75L19.35 17.15L21.75 18L19.35 18.85L18.5 21.25L17.65 18.85L15.25 18L17.65 17.15L18.5 14.75Z"
+        stroke="url(#ai-sidebar-sparkle-gradient)"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

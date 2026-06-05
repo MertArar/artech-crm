@@ -12,7 +12,6 @@ import {
   Building,
 } from "lucide-react";
 
-
 export const navigation = [
   {
     title: "Genel",
@@ -31,6 +30,7 @@ export const navigation = [
         label: "Potansiyel Müşteriler",
         href: "/leads",
         icon: UserPlus,
+        ai: true,
       },
     ],
   },
@@ -41,6 +41,7 @@ export const navigation = [
         label: "Satış Fırsatları",
         href: "/deals",
         icon: Target,
+        ai: true,
       },
       {
         label: "Teklifler",
@@ -71,7 +72,12 @@ export const navigation = [
         label: "Departmanlar",
         href: "/departments",
         icon: Building,
-      }
+      },
+      {
+        label: "Yetkilendirme",
+        href: "/authorization",
+        icon: ShieldCheck,
+      },
     ],
   },
   {
