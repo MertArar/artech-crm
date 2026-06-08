@@ -191,4 +191,15 @@ export const users: UserItem[] = [
     role: "Destek",
     department: "Müşteri Destek",
   },
+  {
+    id: 18,
+    firstName: "Muzaffer",
+    lastName: "Ferahkaya",
+    email: "mu.ferahkaya@sempaponpa.com",
+    phone: "+90 505 183 24 34",
+    identityNumber: "12389654446",
+    role: "Yönetici",
+    department: "Yönetim",
+  },
+  
 ];
