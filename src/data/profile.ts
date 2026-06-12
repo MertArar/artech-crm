@@ -6,6 +6,8 @@ export type TodoItem = {
   description: string;
   status: TodoStatus;
   date: string;
+  startDate?: string;
+  endDate?: string;
 };
 
 export type UserProfile = {
@@ -50,6 +52,8 @@ export const todos: TodoItem[] = [
     description: "Kullanıcı yetki seviyeleri ve rol yapısı planlanacak.",
     status: "not-started",
     date: addDays(0),
+    startDate: addDays(0),
+    endDate: addDays(6),
   },
   {
     id: 2,
@@ -57,6 +61,8 @@ export const todos: TodoItem[] = [
     description: "Tablo filtreleme ve arama alanı tasarlanacak.",
     status: "not-started",
     date: addDays(2),
+    startDate: addDays(2),
+    endDate: addDays(4),
   },
   {
     id: 3,
@@ -71,6 +77,8 @@ export const todos: TodoItem[] = [
     description: "Potansiyel müşteri ile ilk görüşme yapılacak.",
     status: "active",
     date: addDays(0),
+    startDate: addDays(0),
+    endDate: addDays(2),
   },
   {
     id: 5,
@@ -78,6 +86,8 @@ export const todos: TodoItem[] = [
     description: "Teklif durumları için taslak arayüz hazırlanacak.",
     status: "active",
     date: addDays(1),
+    startDate: addDays(1),
+    endDate: addDays(7),
   },
   {
     id: 6,
@@ -85,6 +95,8 @@ export const todos: TodoItem[] = [
     description: "Revize teklif dosyası kontrol edilecek.",
     status: "completed",
     date: addDays(-1),
+    startDate: addDays(-3),
+    endDate: addDays(-1),
   },
   {
     id: 7,

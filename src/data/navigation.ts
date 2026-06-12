@@ -32,6 +32,11 @@ export const navigation = [
         icon: UserPlus,
         ai: true,
       },
+      {
+        label: "İşlem Özeti",
+        href: "/summary",
+        icon: FileText,
+      }
     ],
   },
   {
